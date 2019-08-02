@@ -2,7 +2,14 @@
  * Component Description
  */
 import React from "react";
-import { Animated, Dimensions, PanResponder, View } from "react-native";
+import {
+  Animated,
+  Dimensions,
+  LayoutAnimation,
+  PanResponder,
+  UIManager,
+  View
+} from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -55,6 +62,19 @@ export default class Deck extends React.Component {
     this.renderCards = this.renderCards.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.data !== this.props.data) {
+      this.setState({ curIdx: 0 });
+    }
+  }
+
+  componentWillUpdate() {
+    UIManager.setLayoutAnimationEnabledExperimental &&
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+
+    LayoutAnimation.spring();
+  }
+
   render() {
     return <View>{this.renderCards()}</View>;
   }
@@ -83,9 +103,12 @@ export default class Deck extends React.Component {
         }
 
         return (
-          <View key={item.id} style={styles.cardStyle}>
+          <Animated.View
+            key={item.id}
+            style={[styles.cardStyle, { top: 10 * (idx - this.state.curIdx) }]}
+          >
             {this.props.renderCard(item)}
-          </View>
+          </Animated.View>
         );
       })
       .reverse();
